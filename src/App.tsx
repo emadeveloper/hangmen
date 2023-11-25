@@ -4,6 +4,11 @@ import HangmanWord from "./HangmanWord";
 import HangmenDrawing from "./HangmenDrawing";
 import Keyboard from "./Keyboard";
 
+function getWord() {
+  return words[Math.floor(Math.random() * words.length)];
+}
+
+
 function App() {
   const [wordToGuess, setWordToGuess] = useState(() => {
     return words[Math.floor(Math.random() * words.length)];
@@ -13,6 +18,12 @@ function App() {
   const incorrectLetters = guessedLetters.filter(
     (letter) => !wordToGuess.includes(letter)
   );
+
+  const isLosser = incorrectLetters.length >= 6;
+  const isWinner = wordToGuess
+  .split("")
+  .every((letter) => guessedLetters.includes(letter));
+
 
     const addGuessedLetter = useCallback((letter: string) => {
     if(guessedLetters.includes(letter)) return
@@ -39,6 +50,28 @@ function App() {
     }
   }, [guessedLetters])
 
+
+  useEffect(()=>{
+    const handler = (e: KeyboardEvent) => {
+      const key = e.key
+
+      if(key !== 'Enter') return
+      
+
+      e.preventDefault()
+      setGuessedLetters([])
+      setWordToGuess(getWord())
+
+
+    }
+    document.addEventListener('keypress', handler)
+
+      return () => {
+        document.removeEventListener('keypress', handler)
+    }
+  }, [guessedLetters])
+
+
   return (
     <div
       style={{
@@ -50,11 +83,18 @@ function App() {
         alignItems: "center",
       }}
     >
-      <div style={{ fontSize: "2rem", textAlign: "center" }}>Lose Win</div>
+      <div style={{ fontSize: "2rem", textAlign: "center" }}>
+        {isLosser
+          ? "You lost! Try Again!"
+          : isWinner
+          ? "You won!"
+          : "Guess the word!"}
+      </div>
       <HangmenDrawing numberOfGuesses={incorrectLetters.length} />
-      <HangmanWord guessedLetters={guessedLetters} wordToGuess={wordToGuess} />
+      <HangmanWord reveal={isLosser} guessedLetters={guessedLetters} wordToGuess={wordToGuess} />
       <div style={{ alignSelf: "stretch" }}>
         <Keyboard 
+          disabled={isLosser || isWinner}
           activeLetters={guessedLetters.filter(letter =>
             wordToGuess.includes(letter))}
           inactiveLetters={guessedLetters}
