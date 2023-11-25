@@ -54,7 +54,8 @@ const Keyboard = ({
         return (
           <button
           onClick={() => addGuessedLetter(key)}
-          className={`${styles.btn} ${isActive ? styles.active : ""}
+          className={`${styles.btn}
+          ${isActive ? styles.active : ""}
           ${isInactive ? styles.inactive : ""}`}
           disabled={isInactive || isActive}
           key={key}
